@@ -1020,7 +1020,7 @@ func (w *worker) commitBundle(env *environment, txs types.Transactions, interrup
 		if interrupt != nil {
 			if signal := atomic.LoadInt32(interrupt); signal != commitInterruptNone {
 				return signalToErr(signal)
-				}
+			}
 		}
 		// If we don't have enough gas for any further transactions discard the block
 		// since not all bundles of the were applied
@@ -1759,10 +1759,13 @@ func (w *worker) simulateBundles(env *environment, bundles []types.MevBundle, pe
 
 	simResult := make([]*simulatedBundle, len(bundles))
 
+	totalTxs := 0
+	cacheHitBundles := 0
 	var wg sync.WaitGroup
 	for i, bundle := range bundles {
 		if simmed, ok := simCache.GetSimulatedBundle(bundle.Hash); ok {
 			simResult[i] = simmed
+			cacheHitBundles += 1
 			continue
 		}
 
@@ -1775,6 +1778,7 @@ func (w *worker) simulateBundles(env *environment, bundles []types.MevBundle, pe
 				bundleTxNumHistogram.Update(int64(len(bundle.Txs)))
 			}
 
+			totalTxs += len(bundle.Txs)
 			if len(bundle.Txs) == 0 {
 				return
 			}
@@ -1814,7 +1818,10 @@ func (w *worker) simulateBundles(env *environment, bundles []types.MevBundle, pe
 		}
 	}
 
-	log.Debug("Simulated bundles", "block", env.header.Number, "allBundles", len(bundles), "okBundles", len(simulatedBundles), "time", time.Since(start))
+	log.Info("Simulated bundles", "block", env.header.Number,
+		"allBundles", len(bundles), "okBundles", len(simulatedBundles),
+		"cacheHitBundles", cacheHitBundles, "totalTxs", totalTxs,
+		"time", time.Since(start))
 	if metrics.EnabledBuilder {
 		blockBundleSimulationTimer.Update(time.Since(start))
 	}
