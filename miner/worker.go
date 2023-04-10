@@ -1397,6 +1397,7 @@ func (w *worker) fillTransactionsAlgoWorker(interrupt *int32, env *environment) 
 	if metrics.EnabledBuilder {
 		mergeAlgoTimer.Update(time.Since(start))
 	}
+	log.Info("GreedyBuildBlock", "time", time.Since(start))
 	*env = *newEnv
 
 	return nil, blockBundles, bundlesToConsider
