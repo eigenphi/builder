@@ -6,6 +6,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
+	"time"
 )
 
 // / To use it:
@@ -30,6 +31,9 @@ func newGreedyBuilder(chain *core.BlockChain, chainConfig *params.ChainConfig, b
 func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders *types.TransactionsByPriceAndNonce) []types.SimulatedBundle {
 	usedBundles := []types.SimulatedBundle{}
 
+	txCount := 0
+	bundleCount := 0
+	start := time.Now()
 	for {
 		order := orders.Peek()
 		if order == nil {
@@ -37,6 +41,7 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 		}
 
 		if tx := order.Tx(); tx != nil {
+			txCount += 1
 			receipt, skip, err := envDiff.commitTx(tx, b.chainData)
 			switch skip {
 			case shiftTx:
@@ -54,6 +59,7 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 				log.Trace("Included tx", "EGP", effGapPrice.String(), "gasUsed", receipt.GasUsed)
 			}
 		} else if bundle := order.Bundle(); bundle != nil {
+			bundleCount += 1
 			//log.Debug("buildBlock considering bundle", "egp", bundle.MevGasPrice.String(), "hash", bundle.OriginalBundle.Hash)
 			err := envDiff.commitBundle(bundle, b.chainData, b.interrupt)
 			orders.Pop()
@@ -66,6 +72,7 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 			usedBundles = append(usedBundles, *bundle)
 		}
 	}
+	log.Info("Applied", txCount, "txs and", bundleCount, "bundles in", time.Since(start))
 
 	return usedBundles
 }
