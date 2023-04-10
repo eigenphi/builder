@@ -72,7 +72,7 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 			usedBundles = append(usedBundles, *bundle)
 		}
 	}
-	log.Info("Applied", txCount, "txs and", bundleCount, "bundles in", time.Since(start))
+	log.Info("ApplyTxAndBundles", "txCount", txCount, "bundleCount", bundleCount, "time", time.Since(start))
 
 	return usedBundles
 }
