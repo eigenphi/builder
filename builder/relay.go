@@ -150,7 +150,7 @@ func (r *RemoteRelay) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, _ V
 }
 
 func (r *RemoteRelay) SubmitBlockCapella(msg *capella.SubmitBlockRequest, _ ValidatorData) error {
-	log.Info("submitting block to remote relay", "endpoint", r.endpoint, "msg", msg)
+	log.Info("submitting block to remote relay", "endpoint", r.endpoint)
 	code, err := server.SendHTTPRequest(context.TODO(), *http.DefaultClient, http.MethodPost, r.endpoint+"/relay/v1/builder/blocks", msg, nil)
 	if err != nil {
 		return fmt.Errorf("error sending http request to relay %s. err: %w", r.endpoint, err)
@@ -194,7 +194,7 @@ func (r *RemoteRelay) getSlotValidatorMapFromRelay() (map[uint64]ValidatorData, 
 			FeeRecipient: feeRecipient,
 			GasLimit:     data.Entry.Message.GasLimit,
 		}
-		log.Info("get Slot Validator Map From Relay", "Slot", data.Slot, "data", res[data.Slot])
+		//log.Info("get Slot Validator Map From Relay", "Slot", data.Slot, "data", res[data.Slot])
 	}
 
 	return res, nil
