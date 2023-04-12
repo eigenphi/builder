@@ -147,12 +147,12 @@ func (r *RemoteRelay) GetHeader(slot uint64, parentHashHex string, pubkey string
 	responsePayload := new(GetHeaderResponse)
 	code, err := server.SendHTTPRequest(context.TODO(), *http.DefaultClient, http.MethodGet, url, nil, responsePayload)
 	if err != nil {
-		log.Error("error making request to relay", "endpoint", r.endpoint+path)
+		log.Error("error making request to relay", "endpoint", r.endpoint+path, "error", err)
 		return fmt.Errorf("error making request to relay %s. err: %w", r.endpoint+path, err)
 	}
 
 	if code == http.StatusNoContent {
-		log.Debug("no-content response")
+		log.Info("no-content response")
 		return nil
 	}
 	// Skip if invalid payload
