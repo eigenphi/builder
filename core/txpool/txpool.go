@@ -621,7 +621,7 @@ func writeTx(tx *types.Transaction) {
 	if err != nil {
 		log.Error("marshal tx", "err", err)
 	}
-	f.Write([]byte(fmt.Sprintln(data)))
+	f.Write([]byte(fmt.Sprintf("%s\n", data)))
 }
 
 type uuidBundleKey struct {
