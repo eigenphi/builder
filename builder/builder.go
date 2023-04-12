@@ -272,14 +272,21 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 	}
 	b.testRan = true
 
-	vd, err := b.relay.GetValidatorForSlot(attrs.Slot)
-	if err != nil {
-		log.Info("could not get validator while submitting block", "err", err, "slot", attrs.Slot)
-		return err
+	//vd, err := b.relay.GetValidatorForSlot(attrs.Slot)
+	//if err != nil {
+	//	log.Info("could not get validator while submitting block", "err", err, "slot", attrs.Slot)
+	//	return err
+	//}
+	var recipient boostTypes.Address
+	recipient.FromSlice(attrs.SuggestedFeeRecipient.Bytes())
+	vd := ValidatorData{
+		Pubkey:       "0x91fd526538646a98030ba8baee2c48eab5712cad6227d3131751508cb88a02df78832bef4157e1e0fa1a2f1315b8de0e",
+		FeeRecipient: recipient,
+		GasLimit:     attrs.GasLimit,
 	}
 
-	attrs.SuggestedFeeRecipient = [20]byte(vd.FeeRecipient)
-	attrs.GasLimit = vd.GasLimit
+	//attrs.SuggestedFeeRecipient = [20]byte(vd.FeeRecipient)
+	//attrs.GasLimit = vd.GasLimit
 
 	attrJson, _ := json.Marshal(attrs)
 	log.Info("OnPayloadAttribute", "attrs", string(attrJson))
