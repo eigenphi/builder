@@ -669,7 +669,8 @@ func (w *worker) mainLoop() {
 				}
 			}()
 		case ev := <-w.chainSideCh:
-			log.Info("chainSideCh", "blockNum", ev.Block.Number().String())
+			log.Info("chainSideCh", "blockHash", ev.Block.Hash().String(),
+				"headerHash", ev.Block.Header().Hash().String())
 			// Short circuit for duplicate side blocks
 			if _, exist := w.localUncles[ev.Block.Hash()]; exist {
 				continue
