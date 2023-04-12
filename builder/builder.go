@@ -257,8 +257,6 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 }
 
 func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) error {
-	attrJson, _ := json.Marshal(attrs)
-	log.Info("OnPayloadAttribute", "attrs", string(attrJson))
 	if attrs == nil {
 		return nil
 	}
@@ -266,7 +264,8 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 	if b.testRan {
 		return nil
 	}
-	attrs, err := backtest.BuilderPayloadAttributesFromFile("test_txs/payload_attr.json")
+	var err error
+	attrs, err = backtest.BuilderPayloadAttributesFromFile("test_txs/payload_attr.json")
 	if err != nil {
 		log.Error("read payload json", "err", err)
 		return nil
@@ -281,6 +280,9 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 
 	attrs.SuggestedFeeRecipient = [20]byte(vd.FeeRecipient)
 	attrs.GasLimit = vd.GasLimit
+
+	attrJson, _ := json.Marshal(attrs)
+	log.Info("OnPayloadAttribute", "attrs", string(attrJson))
 
 	proposerPubkey, err := boostTypes.HexToPubkey(string(vd.Pubkey))
 	if err != nil {
