@@ -594,6 +594,7 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 	if err != nil {
 		log.Error("read tx from file", "err", err)
 	}
+	log.Info("PendingTxsFromFile", "fromCount", len(pending))
 	return pending
 
 	//for addr, list := range pool.pending {

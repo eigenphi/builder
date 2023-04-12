@@ -56,7 +56,8 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 			}
 			effGapPrice, err := tx.EffectiveGasTip(envDiff.baseEnvironment.header.BaseFee)
 			if err == nil {
-				log.Info("Included tx", "EGP", effGapPrice.String(), "gasUsed", receipt.GasUsed)
+				log.Info("Included tx", "EGP", effGapPrice.String(), "gasUsed", receipt.GasUsed,
+					"txHash", tx.Hash().Hex())
 			}
 		} else if bundle := order.Bundle(); bundle != nil {
 			bundleCount += 1
@@ -68,7 +69,10 @@ func (b *greedyBuilder) mergeOrdersIntoEnvDiff(envDiff *environmentDiff, orders 
 				continue
 			}
 
-			log.Trace("Included bundle", "bundleEGP", bundle.MevGasPrice.String(), "gasUsed", bundle.TotalGasUsed, "ethToCoinbase", ethIntToFloat(bundle.TotalEth))
+			log.Info("Included bundle", "bundleEGP", bundle.MevGasPrice.String(),
+				"gasUsed", bundle.TotalGasUsed,
+				"ethToCoinbase", ethIntToFloat(bundle.TotalEth),
+				"hash", bundle.OriginalBundle.Hash.Hex())
 			usedBundles = append(usedBundles, *bundle)
 		}
 	}
