@@ -1383,6 +1383,7 @@ func (w *worker) fillTransactions(interrupt *int32, env *environment) (error, []
 // into the given sealing block.
 // Returns error if any, otherwise the bundles that made it into the block and all bundles that passed simulation
 func (w *worker) fillTransactionsAlgoWorker(interrupt *int32, env *environment) (error, []types.SimulatedBundle, []types.SimulatedBundle) {
+	log.Info("env tx head", "hash", env.header.Hash().Hex())
 	// Split the pending transactions into locals and remotes
 	// Fill the block with all available pending transactions.
 	pending := w.eth.TxPool().Pending(true)
