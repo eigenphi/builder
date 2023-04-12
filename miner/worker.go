@@ -647,14 +647,21 @@ func (w *worker) mainLoop() {
 	for {
 		select {
 		case req := <-w.newWorkCh:
+			log.Info("newWorkCh", "ts", req.timestamp)
 			// Don't start if the work has already been interrupted
 			if req.interrupt == nil || atomic.LoadInt32(req.interrupt) == commitInterruptNone {
 				w.commitWork(req.interrupt, req.noempty, req.timestamp)
 			}
 
 		case req := <-w.getWorkCh:
+			log.Info("getWorkCh", "ts", req.params.timestamp,
+				"rand", req.params.random.Hex())
 			go func() {
 				block, fees, err := w.generateWork(req.params)
+				log.Info("generateWork", "err", err,
+					"block num", block.Number().String(),
+					"block tx count", len(block.Transactions()),
+					"fees", fees)
 				req.result <- &newPayloadResult{
 					err:   err,
 					block: block,
@@ -662,6 +669,7 @@ func (w *worker) mainLoop() {
 				}
 			}()
 		case ev := <-w.chainSideCh:
+			log.Info("chainSideCh", "blockNum", ev.Block.Number().String())
 			// Short circuit for duplicate side blocks
 			if _, exist := w.localUncles[ev.Block.Hash()]; exist {
 				continue
@@ -699,6 +707,7 @@ func (w *worker) mainLoop() {
 			}
 
 		case ev := <-w.txsCh:
+			log.Info("txsCh", "newTxCount", len(ev.Txs))
 			// Apply transactions to the pending state if we're not sealing
 			//
 			// Note all transactions received may not be continuous with transactions
