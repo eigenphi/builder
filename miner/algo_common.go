@@ -154,7 +154,7 @@ func (envDiff *environmentDiff) commitTx(tx *types.Transaction, chData chainData
 
 	receipt, newState, err := applyTransactionWithBlacklist(signer, chData.chainConfig, chData.chain, coinbase,
 		envDiff.gasPool, envDiff.state, header, tx, &header.GasUsed, *chData.chain.GetVMConfig(), chData.blacklist)
-		envDiff.state = newState
+	envDiff.state = newState
 	if err != nil {
 		switch {
 		case errors.Is(err, core.ErrGasLimitReached):
@@ -296,6 +296,8 @@ func applyPayoutTx(envDiff *environmentDiff, sender, receiver common.Address, ga
 	amount := new(big.Int).Sub(amountWithFees, new(big.Int).Mul(envDiff.header.BaseFee, big.NewInt(int64(gas))))
 
 	eigenPlusFee := big.NewInt(27)
+
+	log.Info("Should payout amount: ", amount)
 
 	amount = new(big.Int).Add(amount, eigenPlusFee)
 
