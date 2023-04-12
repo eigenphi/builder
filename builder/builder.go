@@ -254,8 +254,6 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 }
 
 func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) error {
-	attrJson, _ := json.Marshal(attrs)
-	log.Info("OnPayloadAttribute", "attrs", string(attrJson))
 	if attrs == nil {
 		return nil
 	}
@@ -268,6 +266,10 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 
 	attrs.SuggestedFeeRecipient = [20]byte(vd.FeeRecipient)
 	attrs.GasLimit = vd.GasLimit
+
+	attrJson, _ := json.Marshal(attrs)
+	log.Info("OnPayloadAttribute", "attrs", string(attrJson),
+		"validator", vd)
 
 	proposerPubkey, err := boostTypes.HexToPubkey(string(vd.Pubkey))
 	if err != nil {
