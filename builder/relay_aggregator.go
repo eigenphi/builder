@@ -3,6 +3,7 @@ package builder
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"sync"
 
 	"github.com/attestantio/go-builder-client/api/capella"
@@ -60,8 +61,8 @@ func (r *RemoteRelayAggregator) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRe
 
 	return nil
 }
-func (r *RemoteRelayAggregator) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
-	return nil
+func (r *RemoteRelayAggregator) GetHeader(slot uint64, parentHashHex string, pubkey string) (*big.Float, error) {
+	return new(big.Float), nil
 }
 
 func (r *RemoteRelayAggregator) SubmitBlockCapella(msg *capella.SubmitBlockRequest, registration ValidatorData) error {

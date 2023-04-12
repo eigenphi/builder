@@ -49,7 +49,7 @@ type IRelay interface {
 	SubmitBlockCapella(msg *capellaapi.SubmitBlockRequest, vd ValidatorData) error
 	GetValidatorForSlot(nextSlot uint64) (ValidatorData, error)
 
-	GetHeader(slot uint64, parentHashHex string, pubkey string) error
+	GetHeader(slot uint64, parentHashHex string, pubkey string) (*big.Float, error)
 	Start() error
 	Stop()
 }
@@ -235,8 +235,11 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 		}
 	} else {
 		go b.ds.ConsumeBuiltBlock(block, blockValue, ordersClosedAt, sealedAt, commitedBundles, allBundles, &boostBidTrace)
-		b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
-
+		valueEth, err := b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
+		if err != nil {
+			log.Error("could not get header from relay ", "err", err, "attrs.Slot", attrs.Slot)
+		}
+		log.Info("get bid from relay", "slot", attrs.Slot, "value", valueEth.Text('f', 18))
 		err = b.relay.SubmitBlockCapella(&blockSubmitReq, vd)
 		if err != nil {
 			log.Error("could not submit capella block", "err", err, "#commitedBundles", len(commitedBundles))

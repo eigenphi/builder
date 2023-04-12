@@ -140,38 +140,38 @@ func weiBigIntToEthBigFloat(wei *big.Int) (ethValue *big.Float) {
 	return
 }
 
-func (r *RemoteRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
+func (r *RemoteRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) (*big.Float, error) {
 	path := fmt.Sprintf("/eth/v1/builder/header/%d/%s/%s", slot, parentHashHex, pubkey)
 	url := r.endpoint + path
-	log.Info("get header from remote relay", "slot", slot, "parentHashHex", parentHashHex, "pubkey", pubkey, "endpoint", url)
+	log.Debug("get header from remote relay", "slot", slot, "parentHashHex", parentHashHex, "pubkey", pubkey, "endpoint", url)
 	responsePayload := new(GetHeaderResponse)
 	code, err := server.SendHTTPRequest(context.TODO(), *http.DefaultClient, http.MethodGet, url, nil, responsePayload)
 	if err != nil {
 		log.Error("error making request to relay", "endpoint", r.endpoint+path, "error", err)
-		return fmt.Errorf("error making request to relay %s. err: %w", r.endpoint+path, err)
+		return new(big.Float), fmt.Errorf("error making request to relay %s. err: %w", r.endpoint+path, err)
 	}
 
 	if code == http.StatusNoContent {
-		log.Info("no-content response")
-		return nil
+		log.Debug("no-content response")
+		return new(big.Float), fmt.Errorf("no-content response %s", r.endpoint+path)
 	}
 	// Skip if invalid payload
 	if responsePayload.IsInvalid() {
-		return nil
+		return new(big.Float), fmt.Errorf("responsePayload IsInvalid %s", r.endpoint+path)
 	}
 	//blockHash := responsePayload.BlockHash()
 	valueEth := weiBigIntToEthBigFloat(responsePayload.Value())
-	log.Info("get bid from remote relay", "slot", slot, "responseParentHash", responsePayload.ParentHash(), "pubkey", responsePayload.Pubkey(), "value", valueEth.Text('f', 18))
+	//log.Info("get bid from remote relay", "slot", slot, "value", valueEth.Text('f', 18))
 
 	isZeroValue := responsePayload.Value().String() == "0"
 	isEmptyListTxRoot := responsePayload.TransactionsRoot() == "0x7ffe241ea60187fdb0187bfa22de35d1f9bed7ab061d9401fd47e34a54fbede1"
 	if isZeroValue || isEmptyListTxRoot {
 		log.Warn("ignoring bid with 0 value")
-		return nil
+		return new(big.Float), nil
 	}
 	log.Debug("bid received")
 
-	return nil
+	return valueEth, nil
 }
 
 func (r *RemoteRelay) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, _ ValidatorData) error {

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -93,8 +94,8 @@ func (r *LocalRelay) Start() error {
 func (r *LocalRelay) Stop() {
 	r.beaconClient.Stop()
 }
-func (r *LocalRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
-	return nil
+func (r *LocalRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) (*big.Float, error) {
+	return new(big.Float), nil
 }
 
 func (r *LocalRelay) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, _ ValidatorData) error {
