@@ -604,14 +604,14 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 			pending[addr] = txs
 		}
 
-		//for _, tx := range txs {
-		//	writeTx(tx)
-		//}
+		for _, tx := range txs {
+			writeTx(addr, tx)
+		}
 	}
 	return pending
 }
 
-func writeTx(tx *types.Transaction) {
+func writeTx(addr common.Address, tx *types.Transaction) {
 	f, err := os.OpenFile("txs.jsonl", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		log.Error("open file", "file", "txs", "err", err)
@@ -621,7 +621,7 @@ func writeTx(tx *types.Transaction) {
 	if err != nil {
 		log.Error("marshal tx", "err", err)
 	}
-	f.Write([]byte(fmt.Sprintf("%s\n", data)))
+	f.Write([]byte(fmt.Sprintf("%s %s\n", addr.String(), data)))
 }
 
 type uuidBundleKey struct {
