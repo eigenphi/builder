@@ -297,7 +297,7 @@ func applyPayoutTx(envDiff *environmentDiff, sender, receiver common.Address, ga
 
 	eigenPlusFee := big.NewInt(27)
 
-	log.Info("Should payout amount: ", amount)
+	log.Info("Should payout amount", "amount", amount)
 
 	amount = new(big.Int).Add(amount, eigenPlusFee)
 
