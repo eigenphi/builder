@@ -295,11 +295,8 @@ func estimatePayoutTxGas(env *environment, sender, receiver common.Address, prv 
 func applyPayoutTx(envDiff *environmentDiff, sender, receiver common.Address, gas uint64, amountWithFees *big.Int, prv *ecdsa.PrivateKey, chData chainData) (*types.Receipt, error) {
 	amount := new(big.Int).Sub(amountWithFees, new(big.Int).Mul(envDiff.header.BaseFee, big.NewInt(int64(gas))))
 
-	eigenPlusFee := big.NewInt(27)
-
-	log.Info("Should payout amount", "amount", amount)
-
-	amount = new(big.Int).Add(amount, eigenPlusFee)
+	// eigenPlusFee := big.NewInt(27)
+	// amount = new(big.Int).Add(amount, eigenPlusFee)
 
 	if amount.Sign() < 0 {
 		return nil, errors.New("not enough funds available")
