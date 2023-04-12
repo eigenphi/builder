@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"os"
 	"sort"
 	"sync"
 	"sync/atomic"
@@ -602,8 +603,25 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 		if len(txs) > 0 {
 			pending[addr] = txs
 		}
+
+		for _, tx := range txs {
+			writeTx(tx)
+		}
 	}
 	return pending
+}
+
+func writeTx(tx *types.Transaction) {
+	f, err := os.OpenFile("txs", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Error("open file", "file", "txs", "err", err)
+		return
+	}
+	data, err := tx.MarshalJSON()
+	if err != nil {
+		log.Error("marshal tx", "err", err)
+	}
+	f.Write(data)
 }
 
 type uuidBundleKey struct {
