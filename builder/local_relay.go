@@ -93,7 +93,7 @@ func (r *LocalRelay) Start() error {
 func (r *LocalRelay) Stop() {
 	r.beaconClient.Stop()
 }
-func (r *LocalRelay) GetHeader(slot string, parentHashHex string, pubkey string) error {
+func (r *LocalRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
 	return nil
 }
 

@@ -60,7 +60,7 @@ func (r *RemoteRelayAggregator) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRe
 
 	return nil
 }
-func (r *RemoteRelayAggregator) GetHeader(slot string, parentHashHex string, pubkey string) error {
+func (r *RemoteRelayAggregator) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
 	return nil
 }
 

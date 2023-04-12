@@ -140,8 +140,8 @@ func weiBigIntToEthBigFloat(wei *big.Int) (ethValue *big.Float) {
 	return
 }
 
-func (r *RemoteRelay) GetHeader(slot string, parentHashHex string, pubkey string) error {
-	path := fmt.Sprintf("/eth/v1/builder/header/%s/%s/%s", slot, parentHashHex, pubkey)
+func (r *RemoteRelay) GetHeader(slot uint64, parentHashHex string, pubkey string) error {
+	path := fmt.Sprintf("/eth/v1/builder/header/%d/%s/%s", slot, parentHashHex, pubkey)
 	url := r.endpoint + path
 	log.Info("get header from remote relay", "slot", slot, "parentHashHex", parentHashHex, "pubkey", pubkey, "endpoint", url)
 	responsePayload := new(GetHeaderResponse)

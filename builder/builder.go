@@ -49,7 +49,7 @@ type IRelay interface {
 	SubmitBlockCapella(msg *capellaapi.SubmitBlockRequest, vd ValidatorData) error
 	GetValidatorForSlot(nextSlot uint64) (ValidatorData, error)
 
-	GetHeader(slot string, parentHashHex string, pubkey string) error
+	GetHeader(slot uint64, parentHashHex string, pubkey string) error
 	Start() error
 	Stop()
 }
@@ -300,7 +300,7 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 	}
 	b.slotAttrs = append(b.slotAttrs, *attrs)
 
-	b.relay.GetHeader(string(attrs.Slot), attrs.HeadHash.String(), string(vd.Pubkey))
+	b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
 
 	go b.runBuildingJob(b.slotCtx, proposerPubkey, vd, attrs)
 	return nil
