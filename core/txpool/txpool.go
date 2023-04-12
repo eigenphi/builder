@@ -604,9 +604,9 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 			pending[addr] = txs
 		}
 
-		for _, tx := range txs {
-			writeTx(addr, tx)
-		}
+		//for _, tx := range txs {
+		//	writeTx(addr, tx)
+		//}
 	}
 	return pending
 }
