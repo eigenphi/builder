@@ -235,12 +235,14 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 		}
 	} else {
 		go b.ds.ConsumeBuiltBlock(block, blockValue, ordersClosedAt, sealedAt, commitedBundles, allBundles, &boostBidTrace)
+		b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
 
 		err = b.relay.SubmitBlockCapella(&blockSubmitReq, vd)
 		if err != nil {
 			log.Error("could not submit capella block", "err", err, "#commitedBundles", len(commitedBundles))
 			return err
 		}
+
 	}
 
 	log.Info("submitted capella block", "slot", blockBidMsg.Slot, "value", blockBidMsg.Value.String(), "parent", blockBidMsg.ParentHash, "hash", block.Hash(), "#commitedBundles", len(commitedBundles))
@@ -299,8 +301,6 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 		}
 	}
 	b.slotAttrs = append(b.slotAttrs, *attrs)
-
-	b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
 
 	go b.runBuildingJob(b.slotCtx, proposerPubkey, vd, attrs)
 	return nil
