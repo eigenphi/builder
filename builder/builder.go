@@ -2,6 +2,7 @@ package builder
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"math/big"
 	_ "os"
@@ -253,6 +254,8 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 }
 
 func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) error {
+	attrJson, _ := json.Marshal(attrs)
+	log.Info("OnPayloadAttribute", "attrs", string(attrJson))
 	if attrs == nil {
 		return nil
 	}

@@ -13,7 +13,7 @@ type BuilderPayloadAttributes struct {
 	Slot                  uint64         `json:"slot"`
 	HeadHash              common.Hash    `json:"blockHash"`
 	Withdrawals           Withdrawals    `json:"withdrawals"`
-	GasLimit              uint64
+	GasLimit              uint64         `json:"gas_limit"`
 }
 
 func (attrs *BuilderPayloadAttributes) Equal(other *BuilderPayloadAttributes) bool {
