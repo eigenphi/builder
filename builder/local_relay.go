@@ -93,6 +93,9 @@ func (r *LocalRelay) Start() error {
 func (r *LocalRelay) Stop() {
 	r.beaconClient.Stop()
 }
+func (r *LocalRelay) GetHeader(slot string, parentHashHex string, pubkey string) error {
+	return nil
+}
 
 func (r *LocalRelay) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, _ ValidatorData) error {
 	log.Info("submitting block to local relay", "block", msg.ExecutionPayload.BlockHash.String())

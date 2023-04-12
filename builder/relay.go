@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strings"
 	"sync"
@@ -131,6 +132,47 @@ func (r *RemoteRelay) Start() error {
 }
 
 func (r *RemoteRelay) Stop() {}
+func weiBigIntToEthBigFloat(wei *big.Int) (ethValue *big.Float) {
+	// wei / 10^18
+	fbalance := new(big.Float)
+	fbalance.SetString(wei.String())
+	ethValue = new(big.Float).Quo(fbalance, big.NewFloat(1e18))
+	return
+}
+
+func (r *RemoteRelay) GetHeader(slot string, parentHashHex string, pubkey string) error {
+	path := fmt.Sprintf("/eth/v1/builder/header/%s/%s/%s", slot, parentHashHex, pubkey)
+	url := r.endpoint + path
+	log.Info("get header from remote relay", "slot", slot, "parentHashHex", parentHashHex, "pubkey", pubkey, "endpoint", url)
+	responsePayload := new(GetHeaderResponse)
+	code, err := server.SendHTTPRequest(context.TODO(), *http.DefaultClient, http.MethodGet, url, nil, responsePayload)
+	if err != nil {
+		log.Error("error making request to relay", "endpoint", r.endpoint+path)
+		return fmt.Errorf("error making request to relay %s. err: %w", r.endpoint+path, err)
+	}
+
+	if code == http.StatusNoContent {
+		log.Debug("no-content response")
+		return nil
+	}
+	// Skip if invalid payload
+	if responsePayload.IsInvalid() {
+		return nil
+	}
+	//blockHash := responsePayload.BlockHash()
+	valueEth := weiBigIntToEthBigFloat(responsePayload.Value())
+	log.Info("get bid from remote relay", "slot", slot, "responseParentHash", responsePayload.ParentHash(), "pubkey", responsePayload.Pubkey(), "value", valueEth.Text('f', 18))
+
+	isZeroValue := responsePayload.Value().String() == "0"
+	isEmptyListTxRoot := responsePayload.TransactionsRoot() == "0x7ffe241ea60187fdb0187bfa22de35d1f9bed7ab061d9401fd47e34a54fbede1"
+	if isZeroValue || isEmptyListTxRoot {
+		log.Warn("ignoring bid with 0 value")
+		return nil
+	}
+	log.Debug("bid received")
+
+	return nil
+}
 
 func (r *RemoteRelay) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, _ ValidatorData) error {
 	log.Info("submitting block to remote relay", "endpoint", r.endpoint)

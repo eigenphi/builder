@@ -48,6 +48,8 @@ type IRelay interface {
 	SubmitBlock(msg *boostTypes.BuilderSubmitBlockRequest, vd ValidatorData) error
 	SubmitBlockCapella(msg *capellaapi.SubmitBlockRequest, vd ValidatorData) error
 	GetValidatorForSlot(nextSlot uint64) (ValidatorData, error)
+
+	GetHeader(slot string, parentHashHex string, pubkey string) error
 	Start() error
 	Stop()
 }
@@ -233,6 +235,7 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 		}
 	} else {
 		go b.ds.ConsumeBuiltBlock(block, blockValue, ordersClosedAt, sealedAt, commitedBundles, allBundles, &boostBidTrace)
+
 		err = b.relay.SubmitBlockCapella(&blockSubmitReq, vd)
 		if err != nil {
 			log.Error("could not submit capella block", "err", err, "#commitedBundles", len(commitedBundles))
@@ -296,6 +299,8 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 		}
 	}
 	b.slotAttrs = append(b.slotAttrs, *attrs)
+
+	b.relay.GetHeader(string(attrs.Slot), attrs.HeadHash.String(), string(vd.Pubkey))
 
 	go b.runBuildingJob(b.slotCtx, proposerPubkey, vd, attrs)
 	return nil

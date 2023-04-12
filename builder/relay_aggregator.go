@@ -60,6 +60,9 @@ func (r *RemoteRelayAggregator) SubmitBlock(msg *boostTypes.BuilderSubmitBlockRe
 
 	return nil
 }
+func (r *RemoteRelayAggregator) GetHeader(slot string, parentHashHex string, pubkey string) error {
+	return nil
+}
 
 func (r *RemoteRelayAggregator) SubmitBlockCapella(msg *capella.SubmitBlockRequest, registration ValidatorData) error {
 	r.registrationsCacheLock.RLock()
