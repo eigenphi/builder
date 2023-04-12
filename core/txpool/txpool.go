@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/ethereum/go-ethereum/backtest"
 	"math"
 	"math/big"
 	"os"
@@ -588,27 +589,34 @@ func (pool *TxPool) Pending(enforceTips bool) map[common.Address]types.Transacti
 	defer pool.mu.Unlock()
 
 	pending := make(map[common.Address]types.Transactions)
-	for addr, list := range pool.pending {
-		txs := list.Flatten()
-
-		// If the miner requests tip enforcement, cap the lists now
-		if enforceTips && !pool.locals.contains(addr) {
-			for i, tx := range txs {
-				if tx.EffectiveGasTipIntCmp(pool.gasPrice, pool.priced.urgent.baseFee) < 0 {
-					txs = txs[:i]
-					break
-				}
-			}
-		}
-		if len(txs) > 0 {
-			pending[addr] = txs
-		}
-
-		//for _, tx := range txs {
-		//	writeTx(addr, tx)
-		//}
+	var err error
+	pending, err = backtest.PendingTxsFromFile("test_txs/txs")
+	if err != nil {
+		log.Error("read tx from file", "err", err)
 	}
 	return pending
+
+	//for addr, list := range pool.pending {
+	//	txs := list.Flatten()
+	//
+	//	// If the miner requests tip enforcement, cap the lists now
+	//	if enforceTips && !pool.locals.contains(addr) {
+	//		for i, tx := range txs {
+	//			if tx.EffectiveGasTipIntCmp(pool.gasPrice, pool.priced.urgent.baseFee) < 0 {
+	//				txs = txs[:i]
+	//				break
+	//			}
+	//		}
+	//	}
+	//	if len(txs) > 0 {
+	//		pending[addr] = txs
+	//	}
+	//
+	//	//for _, tx := range txs {
+	//	//	writeTx(addr, tx)
+	//	//}
+	//}
+	//return pending
 }
 
 func writeTx(addr common.Address, tx *types.Transaction) {

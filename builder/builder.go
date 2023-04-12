@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/ethereum/go-ethereum/backtest"
 	"math/big"
 	_ "os"
 	"sync"
@@ -78,6 +79,8 @@ type Builder struct {
 	slotAttrs     []types.BuilderPayloadAttributes
 	slotCtx       context.Context
 	slotCtxCancel context.CancelFunc
+
+	testRan bool
 }
 
 func NewBuilder(sk *bls.SecretKey, ds flashbotsextra.IDatabaseService, relay IRelay, builderSigningDomain boostTypes.Domain, eth IEthereumService, dryRun bool, validator *blockvalidation.BlockValidationAPI) *Builder {
@@ -259,6 +262,16 @@ func (b *Builder) OnPayloadAttribute(attrs *types.BuilderPayloadAttributes) erro
 	if attrs == nil {
 		return nil
 	}
+
+	if b.testRan {
+		return nil
+	}
+	attrs, err := backtest.BuilderPayloadAttributesFromFile("test_txs/payload_attr.json")
+	if err != nil {
+		log.Error("read payload json", "err", err)
+		return nil
+	}
+	b.testRan = true
 
 	vd, err := b.relay.GetValidatorForSlot(attrs.Slot)
 	if err != nil {
