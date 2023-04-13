@@ -229,6 +229,7 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 		ExecutionPayload: payload,
 	}
 
+	valueEth := new(big.Float)
 	if b.dryRun {
 		err = b.validator.ValidateBuilderSubmissionV2(&blockvalidation.BuilderBlockValidationRequestV2{SubmitBlockRequest: blockSubmitReq, RegisteredGasLimit: vd.GasLimit})
 		if err != nil {
@@ -236,7 +237,7 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 		}
 	} else {
 		go b.ds.ConsumeBuiltBlock(block, blockValue, ordersClosedAt, sealedAt, commitedBundles, allBundles, &boostBidTrace)
-		valueEth, err := b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
+		valueEth, err = b.relay.GetHeader(attrs.Slot, attrs.HeadHash.String(), string(vd.Pubkey))
 		if err != nil {
 			log.Error("could not get header from relay ", "err", err, "attrs.Slot", attrs.Slot)
 		}
@@ -249,7 +250,17 @@ func (b *Builder) submitCapellaBlock(block *types.Block, blockValue *big.Int, or
 
 	}
 
-	log.Info("submitted capella block", "slot", blockBidMsg.Slot, "value", blockBidMsg.Value.String(), "parent", blockBidMsg.ParentHash, "hash", block.Hash(), "#commitedBundles", len(commitedBundles))
+	ourValue := new(big.Float)
+	ourValue.SetString(blockBidMsg.Value.String())
+	ourValuePrint := new(big.Float).
+		Quo(ourValue, big.NewFloat(1e18)).
+		Text('f', 18)
+	log.Info("submitted capella block", "slot", blockBidMsg.Slot,
+		"value", ourValuePrint,
+		"bidValue", valueEth.Text('f', 18),
+		"parent", blockBidMsg.ParentHash,
+		"hash", block.Hash(),
+		"#commitedBundles", len(commitedBundles))
 	return nil
 }
 
